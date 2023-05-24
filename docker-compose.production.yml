@@ -1,0 +1,35 @@
+version: '3'
+
+volumes:
+  pg_data_production:
+  static_volume:
+
+services:
+
+  db:
+    image: postgres:13.10
+    env_file: .env
+    volumes:
+      - pg_data_production:/var/lib/postgresql/data
+
+  backend:
+    image: vesselchacku/taski_backend
+    env_file: .env
+    depends_on:
+      - db
+    volumes:
+      - static_volume:/backend_static
+
+  frontend:
+    env_file: .env
+    image: vesselchacku/taski_frontend
+    volumes:
+      - static_volume:/frontend_static
+    command: cp -r /app/build/. /frontend_static/
+
+  gateway:
+    image: vesselchacku/taski_gateway
+    ports:
+      - 8000:80
+    volumes:
+      - static_volume:/staticfiles/
